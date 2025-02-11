@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+  margin:0 ;
+  padding:0;
+  height: 100%;
+  overflow-x: hidden;
+}
+html{
+  height:100%;
+  margin:0;
+}
+@layer utilities {
+  .drop {
+    @apply relative h-full 
+  }
+
+  .drop1{
+    @apply absolute top-full left-0 overflow-hidden h-0
+  }
+ 
+}
