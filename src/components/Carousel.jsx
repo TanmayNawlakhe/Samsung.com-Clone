@@ -15,22 +15,20 @@ const VideoCarousel = () => {
   const [state, setState] = useState({
     slideId: 0,
     isPlaying: true,
-    isTransitioning: false
+    isTransitioning: false,
+    isMobile: window.innerWidth < 720
   });
 
-  const { slideId, isPlaying, isTransitioning } = state;
+  const { slideId, isPlaying, isTransitioning, isMobile } = state;
 
-  const SLIDE_DURATION = 5; // Duration for each slide in seconds
-  const TRANSITION_DURATION = 1; // Duration for slide transition animation
+  const SLIDE_DURATION = 5;
+  const TRANSITION_DURATION = 1;
 
   const resetMediaAndProgress = (index) => {
-    // Reset video if it exists
     if (videoRefs.current[index]) {
       videoRefs.current[index].pause();
       videoRefs.current[index].currentTime = 0;
     }
-
-    // Reset progress bar
     if (progressBarRef.current[index]) {
       gsap.set(progressBarRef.current[index], { width: "0%" });
     }
@@ -112,40 +110,34 @@ const VideoCarousel = () => {
 
   const handleNext = () => {
     if (isTransitioning) return;
-
     resetMediaAndProgress(slideId);
     const newSlideId = (slideId + 1) % HighlightList.length;
-
-    setState(prev => ({
-      ...prev,
-      slideId: newSlideId,
-      isPlaying: true
-    }));
+    setState(prev => ({ ...prev, slideId: newSlideId, isPlaying: true }));
   };
 
   const handlePrevious = () => {
     if (isTransitioning) return;
-
     resetMediaAndProgress(slideId);
     const newSlideId = (slideId - 1 + HighlightList.length) % HighlightList.length;
-
-    setState(prev => ({
-      ...prev,
-      slideId: newSlideId,
-      isPlaying: true
-    }));
+    setState(prev => ({ ...prev, slideId: newSlideId, isPlaying: true }));
   };
 
   useEffect(() => {
-    // Initialize video refs array
-    videoRefs.current = videoRefs.current.slice(0, HighlightList.length);
+    const handleResize = () => {
+      setState(prev => ({
+        ...prev,
+        isMobile: window.innerWidth < 720
+      }));
+    };
 
-    // Start initial progress animation
+    videoRefs.current = videoRefs.current.slice(0, HighlightList.length);
     if (!isTransitioning) {
       startProgressAnimation();
     }
 
+    window.addEventListener('resize', handleResize);
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (progressBarTimeline.current) {
         progressBarTimeline.current.kill();
       }
@@ -158,7 +150,6 @@ const VideoCarousel = () => {
   useEffect(() => {
     handleSlideTransition(slideId);
 
-    // Handle video playback
     HighlightList.forEach((_, index) => {
       const video = videoRefs.current[index];
       if (video) {
@@ -173,78 +164,69 @@ const VideoCarousel = () => {
   }, [slideId]);
 
   return (
-    <>
-      <div className="flex items-center overflow-hidden relative">
-        <div ref={sliderRef} className="slider flex">
-          {HighlightList.map((list, i) => (
-            <div key={list.id} className="overflow:hidden w-full h-[90vh] px-[40px] flex-shrink-0">
-              <div className="relative">
-                {(list.id === 1 || list.id === 2) ? (
-                  <video
-                    ref={el => videoRefs.current[i] = el}
-                    muted
-                    preload="auto"
-                    className="pointer-events-none w-full h-full mx-auto"
-                    onEnded={() => {
-                      if (i === slideId) handleNext();
-                    }}
-                  >
-                    <source src={list.video} type="video/mp4" />
-                  </video>
-                ) : (
-                  <div className="w-full h-[90vh] flex justify-center items-center">
-                    <img
-                      src={list.image}
-                      alt={list.alt}
-                      className="w-full h-full object-center object-cover"
-                    />
-                  </div>
+    <div className="flex items-center overflow-hidden relative">
+      <div ref={sliderRef} className="slider flex relative">
+        {HighlightList.map((list, i) => (
+          <div key={list.id} className="overflow:hidden w-full h-fit sm:h-[90vh] sm:px-[40px] flex-shrink-0">
+            <div className="relative flex justify-center items-center">
+              {(list.id === 1 || list.id === 2) ? (
+                <video
+                  ref={el => videoRefs.current[i] = el}
+                  muted
+                  preload="auto"
+                  className="pointer-events-none w-full h-[95vh] sm:h-full object-cover mx-auto"
+                  onEnded={() => {
+                    if (i === slideId) handleNext();
+                  }}
+                >
+                  <source src={isMobile ? list.video2 : list.video} type="video/mp4" />
+                </video>
+              ) : (
+                <div className="w-full h-full flex justify-center items-center">
+                  <img
+                    src={isMobile ? list.image2 : list.image}
+                    alt={list.textheading}
+                    className="w-full sm:object-center h-[95vh] sm:h-full object-cover"
+                  />
+                </div>
+              )}
 
-
-                )}
-
-                {(list.id === 2) ? (<div className="absolute top-[15%] transform -translate-y-1/2 max-w-[38%] right-[6%] z-10">
-                  <p className={`text-lg  text-white`}>{list.textsubheading}</p>
-                  <p className={`text-sm opacity-85 pb-3 pt-1 text-white`}>{list.textsubheading2}</p>
-
-                  <div className={`w-fit py-2 px-3 rounded-3xl border-[1px] border-white transition-all duration-100 ease-in-out cursor-pointer font-semibold bg-white hover:bg-black hover:text-white `}>
+              {list.id===2 ? (
+                <div className="absolute flex items-center sm:items-start flex-col top-[80%] sm:top-[15%] text-center sm:text-start transform -translate-y-1/2 max-w-[60%] sm:max-w-[38%] sm:right-[6%] z-10">
+                  <p className=" hidden sm:block text-base sm:text-lg text-white">{list.textsubheading}</p>
+                  <p className="text-xs sm:text-sm opacity-85 pb-3 pt-1 text-white">{list.textsubheading2}</p>
+                  <div className="w-fit py-2 px-3 rounded-3xl border-[1px] border-white transition-all duration-100 ease-in-out cursor-pointer font-semibold bg-white hover:bg-black hover:text-white">
                     {list.buttontext}
                   </div>
-                </div>)
-                  : (list.id === 4 || list.id == 5) ?
-                    (<div className="flex flex-col gap-5 absolute top-[50%] transform -translate-y-1/2 max-w-[38%] left-[6%] z-10">
-                      <p className={`text-5xl font-bold pb-[16px] ${list.id === 4 ? "text-white" : ""
-                        }`}>{list.textheading}</p>
-                      <div><p className={`md:text-lg text-md  ${list.id === 4 ? "text-white" : ""
-                        }`}>{list.textsubheading}</p>
-                        <p className={`md:text-lg text-md pb-2 ${list.id === 4 ? "text-white" : ""
-                          }`}>{list.textsubheading2}</p></div>
-
-                      <div className={`w-fit py-2 px-3 rounded-3xl font-semibold ${list.id === 4 ? "bg-white" : "bg-black text-white"
-                        }`}>
-                        {list.buttontext}
-                      </div>
-                    </div>)
-                    :
-                    (<div className="absolute top-[50%] transform -translate-y-1/2 max-w-[38%] left-[6%] z-10">
-                      <p className={`text-5xl font-bold pb-[16px] ${list.id === 3 || list.id === 4 ? "text-white" : ""
-                        }`}>{list.textheading}</p>
-                      <p className={`md:text-lg text-md py-4 ${list.id === 3 || list.id === 4 ? "text-white" : ""
-                        }`}>{list.textsubheading}</p>
-                      <div className={`w-fit py-2 px-3 rounded-3xl font-semibold ${list.id === 3 || list.id === 4 ? "bg-white" : "bg-black text-white"
-                        }`}>
-                        {list.buttontext}
-                      </div>
-                    </div>)}
-
-              </div>
+                </div>
+              ) : (list.id === 4 || list.id === 5) ? (
+                <div className="flex flex-col justify-center items-center sm:items-start text-center absolute top-[25%] transform sm:text-start -translate-y-1/2 max-w-[75%] sm:max-w-[38%] sm:left-[6%] z-10">
+                  <p className={`text-3xl sm:text-5xl font-bold pb-[7px] sm:pb-[16px] ${list.id === 4 ? "text-white" : ""}`}>{list.textheading}</p>
+                  <div>
+                    <p className={`md:text-lg text-md ${list.id === 4 ? "text-white" : ""}`}>{list.textsubheading}</p>
+                    <p className={`md:text-lg text-md pb-2 ${list.id === 4 ? "text-white" : ""}`}>{list.textsubheading2}</p>
+                  </div>
+                  <div className={`w-fit py-2 px-3 rounded-3xl font-semibold ${list.id === 4 ? "bg-white" : "bg-black text-white"}`}>
+                    {list.buttontext}
+                  </div>
+                </div>
+              
+              ) : (
+                <div className="absolute top-[30%] flex  transform -translate-y-1/2 max-w-[75%] flex-col justify-center items-center  sm:items-start text-center sm:max-w-[38%] sm:left-[6%] sm:text-start z-10">
+                  <p className={`text-3xl sm:text-5xl font-bold pb-[7px] sm:pb-[16px]  ${list.id === 3  ? "text-white" : ""}`}>{list.textheading}</p>
+                  <p className={`md:text-lg text-md pb-3 sm:py-4   ${list.id === 3  ? "text-white" : ""}`}>{list.textsubheading}</p>
+                  <div className={`w-fit py-2 px-3 rounded-3xl font-semibold  ${list.id === 3 ? "bg-white" : "bg-black text-white"}`}>
+                    {list.buttontext}
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       <button
-        className="absolute top-[50%] left-[50px] w-10 h-10 bg-gray-500 opacity-50 hover:opacity-100 flex items-center justify-center pl-[8px] rounded-full"
+        className="absolute top-[50%] left-[50px] w-10 h-10 bg-gray-500 opacity-50 hover:opacity-100 hidden sm:flex items-center justify-center pl-[8px] rounded-full"
         onClick={handlePrevious}
         disabled={isTransitioning}
       >
@@ -252,24 +234,23 @@ const VideoCarousel = () => {
       </button>
 
       <button
-        className="absolute top-[50%] right-[50px] w-10 h-10 bg-gray-500 opacity-50 hover:opacity-100 flex items-center justify-center pr-[2px] rounded-full"
+        className="absolute top-[50%] right-[50px] w-10 h-10 bg-gray-500 opacity-50 hover:opacity-100 hidden sm:flex items-center justify-center pr-[2px] rounded-full"
         onClick={handleNext}
         disabled={isTransitioning}
       >
         <img src={nexticon} alt="Next" />
       </button>
 
-      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex justify-center items-center">
-        <div className="flex items-center space-x-4 px-6">
+      <div className="absolute bottom-5 sm:bottom-12 left-1/2 transform -translate-x-1/2 flex justify-center items-center">
+        <div className="flex items-center space-x-4 px-3 sm:px-6 py-2 sm:py-0 rounded-e-full rounded-s-full bg-slate-300 sm:bg-transparent">
           {HighlightList.map((item, i) => (
             <div
               key={i}
-              className="relative w-40 h-[2px] bg-gray-500 overflow-hidden"
+              className="relative w-1 sm:w-40 h-1 sm:h-[2px] rounded-full sm:rounded-none bg-gray-500 overflow-hidden"
             >
               <div
                 ref={el => progressBarRef.current[i] = el}
-                className={`absolute top-0 left-0 h-full ${item.id === 3 || item.id === 4 ? "bg-white" : "bg-black"
-                  }`}
+                className={`absolute top-0 left-0 h-full ${item.id === 3 || item.id === 4 ? "bg-white" : "bg-black"}`}
               />
             </div>
           ))}
@@ -287,7 +268,7 @@ const VideoCarousel = () => {
           />
         </button>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -65,6 +65,7 @@ export const HighlightList = [
         textsubheading: "Get up to $18000 off a Galaxy Watch Ultra or a Galaxy Buds Bundle. Plus, avail up to 24 months No Cost EMI.",
         buttontext: "Buy now",
         video: '/assets/videos/carouselvideo1.mp4',
+        video2: "//images.samsung.com/is/content/samsung/assets/in/2501/home/HOME_P3_Main-KV_720x1080_mo.mp4",
         duration: 5,
         image: null, 
     },
@@ -75,9 +76,9 @@ export const HighlightList = [
         textsubheading2: "Get 512 GB at the price of 256 GB(Save $12,000)",
 
         buttontext: "Learn more",
-        video: null,
         duration: 5,
         video: '/assets/videos/cr1.mp4', 
+        video2: "//images.samsung.com/is/content/samsung/assets/in/2501/home/HOME_P3_Main-KV_720x1080_mo.mp4",
         image: null,
     },
     {
@@ -88,12 +89,14 @@ export const HighlightList = [
         video: null,
         duration: 5,
         image: '/assets/images/Neoqled.webp',
+        image2: "/assets/images/mobtv.webp",
     },
     {
         id: 4,
         textheading: 'Experience a New Era of Samsung AI TV',
         textsubheading: "Starting $7612*/mo.",
         textsubheading2: "Get a free Crystal 4K UHD TV",
+        image2:"/assets/images/mobtv.webp",
 
         buttontext: "Buy Now",
         video: null,
@@ -110,5 +113,6 @@ export const HighlightList = [
         video: null,
         duration: 5,
         image: '/assets/images/s25t.webp',
+        image2:"/assets/images/mobs25.webp",
     },
 ];
